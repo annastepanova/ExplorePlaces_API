@@ -131,12 +131,26 @@ const updatePlace = async (req, res, next) => {
 
 }
 
-const deletePlace = (req, res, next) => {
+const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid
-  if (!DUMMY_PLACES.find(p => p.id === placeId)) {
-    throw new HttpError('Could not find place for that id', 404)
+  
+  let place
+  try {
+    place = await Place.findById(placeId)
   }
-  DUMMY_PLACES = DUMMY_PLACES.filter(p => p.id !== placeId)
+  catch (err) {
+    const error = new HttpError('Something went wrong. Could not delete place', 500)
+    return next(error)
+  }
+
+  try {
+    await place.remove()
+  }
+  catch (err) {
+    const error = new HttpError('Something went wrong. Could not delete place', 500)
+    return next(error)
+  }
+
   res.status(200).json({message: 'Deleted place'})
 
 }
