@@ -33,7 +33,7 @@ const signup = async (req, res, next) => {
       ) 
   }
 
-  const { name, email, password, places } = req.body
+  const { name, email, password } = req.body
 
   let existingUser
   try {
@@ -54,7 +54,7 @@ const signup = async (req, res, next) => {
     email,
     image: 'https://www.reed.edu/reed-magazine/assets/images/tags/steve-jobs-mac.jpg',
     password,
-    places
+    places: []
   })
 
   try {
