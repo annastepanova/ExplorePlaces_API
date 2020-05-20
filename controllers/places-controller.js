@@ -1,4 +1,3 @@
-const { v4: uuid } = require('uuid')
 const { validationResult } = require('express-validator')
 const mongoose = require('mongoose')
 
@@ -7,19 +6,6 @@ const getCoordsForAddress = require('../util/location')
 const Place = require('../models/place')
 const User = require('../models/user')
 
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Boston Common',
-    description: 'Central public park in downtown Boston, Massachusetts',
-    address: '139 Tremont St, Boston, MA 02111',
-    location: {
-      lat: 42.355437,
-      lng: -71.0662329
-    },
-    creator: 'u1'
-  }
-] 
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid
