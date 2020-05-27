@@ -1,3 +1,5 @@
+const fs = require('fs')
+
 const { validationResult } = require('express-validator')
 const mongoose = require('mongoose')
 
@@ -32,22 +34,30 @@ const getPlaceById = async (req, res, next) => {
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid
 
-  let places
+  // let places
+  let userWithPlaces
   try {
-    places = await Place.find({ creator: userId })
-  }
-  catch (err) {
-    const error = new HttpError("Could not find a place", 500)
+    userWithPlaces = await User.findById(userId).populate('places');
+  } catch (err) {
+    const error = new HttpError(
+      'Fetching places failed, please try again later.',
+      500
+    )
     return next(error)
   }
 
-  if (!places || places.length === 0) {
+  // if (!places || places.length === 0) {
+  if (!userWithPlaces || userWithPlaces.places.length === 0) {
     return next(
-      new HttpError("Can't find places for the provided user id", 404)
+      new HttpError('Could not find places for the provided user id.', 404)
     )
   }
 
-  res.json({ places: places.map(place => place.toObject({getters: true})) })
+  res.json({
+    places: userWithPlaces.places.map(place =>
+      place.toObject({ getters: true })
+    )
+  })
 }
 
 const createPlace = async (req, res, next) => {
@@ -71,7 +81,7 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image: 'https://cdn.traveltripper.io/site-assets/192_866_18602/media/2018-08-29-113233/small_boston-common-guide.jpg',
+    image: req.file.path,
     creator
   })
 
@@ -158,6 +168,8 @@ const deletePlace = async (req, res, next) => {
     return next(error)
   }
 
+  const imagePath = place.image
+
   try {
     const sess = await mongoose.startSession()
     sess.startTransaction()
@@ -170,6 +182,10 @@ const deletePlace = async (req, res, next) => {
     const error = new HttpError('Something went wrong. Could not delete place', 500)
     return next(error)
   }
+
+  fs.unlink(imagePath, err => {
+    console.log(err)
+  })
 
   res.status(200).json({message: 'Deleted place'})
 
