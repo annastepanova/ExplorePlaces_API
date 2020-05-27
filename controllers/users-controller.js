@@ -43,7 +43,7 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image: 'https://www.reed.edu/reed-magazine/assets/images/tags/steve-jobs-mac.jpg',
+    image: req.file.path,
     password,
     places: []
   })
